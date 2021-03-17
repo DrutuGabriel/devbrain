@@ -7,7 +7,7 @@ function Logo() {
   return (
     <div className="ma4 mt0">
       <Tilt
-        className="logo-tilt br2 shadow-2"
+        className="logo-tilt br2"
         options={{ max: 55 }}
         style={{ height: 150, width: 150 }}
       >
