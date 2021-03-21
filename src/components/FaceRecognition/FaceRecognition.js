@@ -1,9 +1,16 @@
-import React from 'react'
+import React from 'react';
+import './FaceRecognition.css';
 
-function FaceRecognition() {
+function FaceRecognition({ imageUrl }) {
   return (
-    <div>Face recognition</div>
-  )
+    <div className="center ma">
+      <div className="absolute mt2">
+        {imageUrl ? (
+          <img src={imageUrl} className="face-image" alt="" />
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
-export default FaceRecognition
+export default FaceRecognition;
