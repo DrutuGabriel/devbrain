@@ -44,27 +44,45 @@ class App extends PureComponent {
     this.state = {
       input: '',
       imageUrl: '',
-      box: {}
+      boxes: [],
     };
   }
 
-  calculateFaceLocation = () => {
-    
-  }
+  calculateFaceLocations = (regions) => {
+    const image = document.getElementById('inputimage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+
+    return regions.map((region) => {
+      const clarifaiFace = region.region_info.bounding_box;
+
+      return {
+        leftCol: clarifaiFace.left_col * width,
+        rightCol: width - clarifaiFace.right_col * width,
+        topRow: clarifaiFace.top_row * height,
+        bottomRow: height - clarifaiFace.bottom_row * height,
+      };
+    });
+  };
+
+  displayFaceBox = (boxes) => {
+    this.setState({boxes});
+  };
 
   onInputChangeHandler = (ev) => {
-    this.setState({input: ev.target.value});
+    this.setState({ input: ev.target.value });
   };
 
   onSubmitHandler = () => {
-    this.setState({imageUrl: this.state.input});
+    this.setState({ imageUrl: this.state.input, boxes: []});
 
     clarifaiApp.models
-      .predict(
-        Clarifai.FACE_DETECT_MODEL,
-        this.state.input
-      )
-      .then((response) => console.log(response.outputs[0].data.regions))
+      .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
+      .then((response) => {
+        this.displayFaceBox(
+          this.calculateFaceLocations(response.outputs[0].data.regions)
+        );
+      })
       .catch((err) => console.log(err));
   };
 
@@ -79,7 +97,10 @@ class App extends PureComponent {
           onInputChange={this.onInputChangeHandler}
           onSubmit={this.onSubmitHandler}
         />
-        <FaceRecognition imageUrl={this.state.imageUrl} />
+        <FaceRecognition
+          imageUrl={this.state.imageUrl}
+          faceBoxes={this.state.boxes}
+        />
       </div>
     );
   }
