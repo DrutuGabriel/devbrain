@@ -7,6 +7,8 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
+import SignIn from './components/SignIn/SignIn';
+import Register from './components/Register/Register';
 
 import './App.css';
 
@@ -45,6 +47,8 @@ class App extends PureComponent {
       input: '',
       imageUrl: '',
       boxes: [],
+      route: 'signin',
+      signedIn: false
     };
   }
 
@@ -66,7 +70,7 @@ class App extends PureComponent {
   };
 
   displayFaceBox = (boxes) => {
-    this.setState({boxes});
+    this.setState({ boxes });
   };
 
   onInputChangeHandler = (ev) => {
@@ -74,7 +78,7 @@ class App extends PureComponent {
   };
 
   onSubmitHandler = () => {
-    this.setState({ imageUrl: this.state.input, boxes: []});
+    this.setState({ imageUrl: this.state.input, boxes: [] });
 
     clarifaiApp.models
       .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
@@ -86,21 +90,44 @@ class App extends PureComponent {
       .catch((err) => console.log(err));
   };
 
+  onRouteChangeHandler = (route, signedIn = null) => {
+    const newState = {route}
+    if(signedIn !== null){
+      newState.signedIn = signedIn;
+    }
+
+    this.setState(newState);
+  };
+
   render() {
+    const {signedIn, imageUrl, route, boxes} = this.state;
+
     return (
       <div className="App">
         <Particles className="particles" params={particleOptions} />
-        <Navigation />
-        <Logo />
-        <Rank />
-        <ImageLinkForm
-          onInputChange={this.onInputChangeHandler}
-          onSubmit={this.onSubmitHandler}
+        <Navigation 
+          onRouteChange={this.onRouteChangeHandler} 
+          isSignedIn={signedIn}
         />
-        <FaceRecognition
-          imageUrl={this.state.imageUrl}
-          faceBoxes={this.state.boxes}
-        />
+        
+        {route === 'home' ? (
+          <React.Fragment>    
+            <Logo />
+            <Rank />
+            <ImageLinkForm
+              onInputChange={this.onInputChangeHandler}
+              onSubmit={this.onSubmitHandler}
+            />
+            <FaceRecognition
+              imageUrl={imageUrl}
+              faceBoxes={boxes}
+            />
+          </React.Fragment>
+        ) : route === 'signin' ? (
+          <SignIn onRouteChange={this.onRouteChangeHandler} />
+        ) : (
+          <Register onRouteChange={this.onRouteChangeHandler} />
+        )}
       </div>
     );
   }
