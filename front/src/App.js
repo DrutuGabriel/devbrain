@@ -50,7 +50,7 @@ class App extends PureComponent {
       route: 'signin',
       signedIn: false
     };
-  }
+  };
 
   calculateFaceLocations = (regions) => {
     const image = document.getElementById('inputimage');

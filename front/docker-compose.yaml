@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  smartbrain-app:
+    build: ./
+    stdin_open: true
+    tty: true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
