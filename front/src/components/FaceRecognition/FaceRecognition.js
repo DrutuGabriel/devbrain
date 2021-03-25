@@ -10,8 +10,8 @@ function FaceRecognition({ imageUrl, faceBoxes }) {
         ) : null}
         {
           faceBoxes ?
-            faceBoxes.map(box => (
-              <div className="bounding-box" style={{
+            faceBoxes.map((box,i) => (
+              <div key={i} className="bounding-box" style={{
                 top: box.topRow,
                 bottom: box.bottomRow,
                 left: box.leftCol,

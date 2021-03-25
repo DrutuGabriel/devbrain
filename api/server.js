@@ -37,7 +37,7 @@ const database = {
 };
 
 app.get('/', (req, res) => {
-  res.send('This is working');
+  res.json(database);
 });
 
 app.post('/signin', (req, res) => {
@@ -55,9 +55,14 @@ app.post('/signin', (req, res) => {
     req.body.email === database.users[0].email &&
     req.body.password === database.users[0].password
   ) {
-    res.json('success');
+    const responseUser = {
+      ...database.users[0],
+    };
+    delete responseUser.password;
+
+    res.json({ success: true, user: responseUser });
   } else {
-    res.status(400).json('error logging in');
+    res.status(400).json({ success: false, message: 'Error while loggin in' });
   }
 });
 
@@ -77,7 +82,13 @@ app.post('/register', (req, res) => {
     joined: new Date(),
   });
 
-  res.json(database.users[database.users.length - 1]);
+  const userResponse = {
+    ...database.users[database.users.length - 1],
+  };
+
+  delete userResponse.password;
+
+  res.json(userResponse);
 });
 
 app.get('/profile/:id', (req, res) => {
@@ -94,12 +105,11 @@ app.get('/profile/:id', (req, res) => {
 app.put('/image', (req, res) => {
   const { id } = req.body;
   const user = database.users.find((user) => user.id === id);
-
   if (user) {
     user.entries += 1;
-    res.json(user.entries);
+    res.json({ success: true, entries: user.entries });
   } else {
-    res.status(404).json('no such user');
+    res.status(404).json({ success: false, message: 'no such user' });
   }
 });
 
