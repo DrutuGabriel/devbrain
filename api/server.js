@@ -2,6 +2,18 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
+const db = require('knex')({
+  client: 'pg',
+  connection: {
+    host: 'mydb',
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
+  },
+});
+
+// db.select('*').from('users')
+//   .then(data => console.log(data));
 
 const app = express();
 
@@ -70,47 +82,71 @@ app.post('/register', (req, res) => {
   const { email, name, password } = req.body;
 
   bcrypt.hash(password, null, null, function (err, hash) {
-    console.log(hash);
+    if (err) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Unable to register.' });
+    }
+
+    return db('login')
+      .insert({
+        email: email,
+        hash: hash,
+      })
+      .then(() => {
+        db('users')
+          .returning('*')
+          .insert({
+            name: name,
+            email: email,
+            // password: password,
+            entries: 0,
+            joined: new Date(),
+          })
+          .then((user) => res.json(user[0]))
+          .catch((err) =>
+            res
+              .status(400)
+              .json({ success: false, message: 'Unable to register.' })
+          );
+      })
+      .catch((err) =>
+        res.status(400).json({ success: false, message: 'Unable to register.' })
+      );
   });
-
-  database.users.push({
-    id: '125',
-    name: name,
-    email: email,
-    password: password,
-    entries: 0,
-    joined: new Date(),
-  });
-
-  const userResponse = {
-    ...database.users[database.users.length - 1],
-  };
-
-  delete userResponse.password;
-
-  res.json(userResponse);
 });
 
 app.get('/profile/:id', (req, res) => {
   const { id } = req.params;
-  const user = database.users.find((user) => user.id === id);
 
-  if (user) {
-    res.json(user);
-  } else {
-    res.status(404).json('no such user');
-  }
+  db.select('*')
+    .from('users')
+    .where('id', id)
+    .then((user) => {
+      if (user.length === 0) {
+        res.status(404).json({ success: false, message: 'Not such user.' });
+      }
+
+      res.json(user[0]);
+    })
+    .catch((err) =>
+      res.status(400).json({ success: false, message: 'Unable to find user.' })
+    );
 });
 
 app.put('/image', (req, res) => {
   const { id } = req.body;
-  const user = database.users.find((user) => user.id === id);
-  if (user) {
-    user.entries += 1;
-    res.json({ success: true, entries: user.entries });
-  } else {
-    res.status(404).json({ success: false, message: 'no such user' });
-  }
+
+  db('users')
+    .where('id', '=', id)
+    .increment('entries', 1)
+    .returning('entries')
+    .then((entries) => {
+      res.json({ success: true, entries: entries[0] });
+    })
+    .catch((err) =>
+      res.status(404).json({ success: false, message: 'Unable to process' })
+    );
 });
 
 app.listen(8000, () => {
