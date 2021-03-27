@@ -12,94 +12,58 @@ const db = require('knex')({
   },
 });
 
-// db.select('*').from('users')
-//   .then(data => console.log(data));
-
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
 
-const database = {
-  users: [
-    {
-      id: '123',
-      name: 'John',
-      email: 'john@doe.com',
-      password: 'thesecret',
-      entries: 0,
-      joined: new Date(),
-    },
-    {
-      id: '124',
-      name: 'Jane',
-      email: 'jane@doe.com',
-      password: 'secrets',
-      entries: 0,
-      joined: new Date(),
-    },
-  ],
-  login: [
-    {
-      id: '987',
-      hash: '',
-      email: 'john@doe.com',
-    },
-  ],
-};
-
 app.get('/', (req, res) => {
-  res.json(database);
+  res.json({'status': 'working well'});
 });
 
 app.post('/signin', (req, res) => {
-  // console.log(database.users);
+  db.select('email', 'hash')
+    .from('login')
+    .where('email', '=', req.body.email)
+    .then((data) => {
+      const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
 
-  // bcrypt.compare(
-  //   'onesecret',
-  //   '$2a$10$PLRnY9j3i7tuZBJo5jtkw.2Ae.BV1qXOlNsn2/rRnmOdkSM65SF/W',
-  //   function (err, theres) {
-  //     // res = false
-  //     console.log('theres', theres);
-  //   }
-  // );
-  if (
-    req.body.email === database.users[0].email &&
-    req.body.password === database.users[0].password
-  ) {
-    const responseUser = {
-      ...database.users[0],
-    };
-    delete responseUser.password;
-
-    res.json({ success: true, user: responseUser });
-  } else {
-    res.status(400).json({ success: false, message: 'Error while loggin in' });
-  }
+      if (isValid) {
+        db.select('*')
+          .from('users')
+          .where('email', '=', req.body.email)
+          .then((user) => {
+            return res.json({ success: true, user: user[0] });
+          });
+      } else {
+        res
+          .status(400)
+          .json({ success: false, message: 'Error while loggin in' });
+      }
+    })
+    .catch((err) =>
+      res.status(400).json({ success: false, message: 'Error while loggin in' })
+    );
 });
 
 app.post('/register', (req, res) => {
   const { email, name, password } = req.body;
+  const hash = bcrypt.hashSync(password);
 
-  bcrypt.hash(password, null, null, function (err, hash) {
-    if (err) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Unable to register.' });
-    }
-
-    return db('login')
+  db.transaction((trx) => {
+    trx
       .insert({
         email: email,
         hash: hash,
       })
-      .then(() => {
-        db('users')
+      .into('login')
+      .returning('email')
+      .then((loginEmail) => {
+        return trx('users')
           .returning('*')
           .insert({
             name: name,
-            email: email,
-            // password: password,
+            email: loginEmail[0],
             entries: 0,
             joined: new Date(),
           })
@@ -110,10 +74,11 @@ app.post('/register', (req, res) => {
               .json({ success: false, message: 'Unable to register.' })
           );
       })
-      .catch((err) =>
-        res.status(400).json({ success: false, message: 'Unable to register.' })
-      );
-  });
+      .then(trx.commit)
+      .catch(trx.rollback);
+  }).catch((err) =>
+    res.status(400).json({ success: false, message: 'Unable to register.' })
+  );
 });
 
 app.get('/profile/:id', (req, res) => {
