@@ -42,6 +42,8 @@ app.put('/image', (req, res) => (
   image.handleImage(req, res, db)
 ));
 
+app.post('/image-url', image.handleApiCall);
+
 app.listen(8000, () => {
   console.log('app is running on port 8000');
 });
