@@ -12,6 +12,11 @@ const db = require('knex')({
   },
 });
 
+const register =  require('./controllers/register');
+const signIn = require('./controllers/signin');
+const profile = require('./controllers/profile');
+const image = require('./controllers/image');
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -21,98 +26,21 @@ app.get('/', (req, res) => {
   res.json({'status': 'working well'});
 });
 
-app.post('/signin', (req, res) => {
-  db.select('email', 'hash')
-    .from('login')
-    .where('email', '=', req.body.email)
-    .then((data) => {
-      const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+app.post('/signin', (req, res) => (
+  signIn.handleSignin(req, res, db, bcrypt)
+));
 
-      if (isValid) {
-        db.select('*')
-          .from('users')
-          .where('email', '=', req.body.email)
-          .then((user) => {
-            return res.json({ success: true, user: user[0] });
-          });
-      } else {
-        res
-          .status(400)
-          .json({ success: false, message: 'Error while loggin in' });
-      }
-    })
-    .catch((err) =>
-      res.status(400).json({ success: false, message: 'Error while loggin in' })
-    );
-});
+app.post('/register', (req, res) => (
+  register.handleRegister(req, res, db, bcrypt)
+));
 
-app.post('/register', (req, res) => {
-  const { email, name, password } = req.body;
-  const hash = bcrypt.hashSync(password);
+app.get('/profile/:id', (req, res) => (
+  profile.handleProfile(req, res, db)
+));
 
-  db.transaction((trx) => {
-    trx
-      .insert({
-        email: email,
-        hash: hash,
-      })
-      .into('login')
-      .returning('email')
-      .then((loginEmail) => {
-        return trx('users')
-          .returning('*')
-          .insert({
-            name: name,
-            email: loginEmail[0],
-            entries: 0,
-            joined: new Date(),
-          })
-          .then((user) => res.json(user[0]))
-          .catch((err) =>
-            res
-              .status(400)
-              .json({ success: false, message: 'Unable to register.' })
-          );
-      })
-      .then(trx.commit)
-      .catch(trx.rollback);
-  }).catch((err) =>
-    res.status(400).json({ success: false, message: 'Unable to register.' })
-  );
-});
-
-app.get('/profile/:id', (req, res) => {
-  const { id } = req.params;
-
-  db.select('*')
-    .from('users')
-    .where('id', id)
-    .then((user) => {
-      if (user.length === 0) {
-        res.status(404).json({ success: false, message: 'Not such user.' });
-      }
-
-      res.json(user[0]);
-    })
-    .catch((err) =>
-      res.status(400).json({ success: false, message: 'Unable to find user.' })
-    );
-});
-
-app.put('/image', (req, res) => {
-  const { id } = req.body;
-
-  db('users')
-    .where('id', '=', id)
-    .increment('entries', 1)
-    .returning('entries')
-    .then((entries) => {
-      res.json({ success: true, entries: entries[0] });
-    })
-    .catch((err) =>
-      res.status(404).json({ success: false, message: 'Unable to process' })
-    );
-});
+app.put('/image', (req, res) => (
+  image.handleImage(req, res, db)
+));
 
 app.listen(8000, () => {
   console.log('app is running on port 8000');
