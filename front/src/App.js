@@ -39,28 +39,32 @@ const clarifaiApp = new Clarifai.App({
   apiKey: '138dc56a9eae4ed29cb20fd120a786cd',
 });
 
+const initialState = {
+  input: '',
+  imageUrl: '',
+  boxes: [],
+  route: 'signin',
+  signedIn: false,
+  user: {
+    id: '',
+    name: '',
+    email: '',
+    entries: 0,
+    joined: '',
+  },
+};
+
 class App extends PureComponent {
   constructor() {
     super();
 
-    this.state = {
-      input: '',
-      imageUrl: '',
-      boxes: [],
-      route: 'signin',
-      signedIn: false,
-      user: {
-        id: '',
-        name: '',
-        email: '',
-        entries: 0,
-        joined: '',
-      },
-    };
+    this.state = initialState;
   }
 
   onLoadUser = (userData) => {
     this.setState({
+      imageUrl: '',
+      input: '',
       user: {
         id: userData.id,
         name: userData.name,
@@ -129,6 +133,8 @@ class App extends PureComponent {
     const newState = { route };
     if (signedIn !== null) {
       newState.signedIn = signedIn;
+    } else if(route === 'signout'){
+      return this.setState(...initialState, ...newState);
     }
 
     this.setState(newState);
