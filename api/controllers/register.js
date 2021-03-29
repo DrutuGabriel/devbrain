@@ -1,5 +1,12 @@
 const handleRegister = (req, res, db, bcrypt) => {
   const { email, name, password } = req.body;
+
+  if (!email || !name || !password) {
+    return res
+      .status(400)
+      .json({ success: false, message: 'Incorrect form submission.' });
+  }
+
   const hash = bcrypt.hashSync(password);
 
   db.transaction((trx) => {
@@ -19,7 +26,10 @@ const handleRegister = (req, res, db, bcrypt) => {
             entries: 0,
             joined: new Date(),
           })
-          .then((user) => res.json(user[0]))
+          .then((user) => res.json({
+            success: true,
+            user: user[0]
+          }))
           .catch((err) =>
             res
               .status(400)
@@ -34,5 +44,5 @@ const handleRegister = (req, res, db, bcrypt) => {
 };
 
 module.exports = {
-  handleRegister: handleRegister
+  handleRegister: handleRegister,
 };
