@@ -38,8 +38,8 @@ const initialState = {
   input: '',
   imageUrl: '',
   boxes: [],
-  route: 'signin',
-  signedIn: false,
+  route: 'home',
+  signedIn: true,
   user: {
     id: '',
     name: '',
