@@ -24,7 +24,10 @@ class ProfileIcon extends PureComponent {
   render() {
     return (
       <div className="tc pa4">
-        <Dropdown isOpen={this.state.dropdownOpen} toggle={this.toggle}>
+        <Dropdown
+          isOpen={this.state.dropdownOpen}
+          toggle={this.toggle}
+        >
           <DropdownToggle
             tag="span"
             data-toggle="dropdown"
@@ -37,14 +40,19 @@ class ProfileIcon extends PureComponent {
             />
           </DropdownToggle>
           <DropdownMenu
+            right
             className="b--transparent shadow-5"
             style={{
               marginTop: '20px',
-              backgroundColor: 'rgba(255, 255,255,0.5)',
+              backgroundColor: 'rgba(255, 255,255,0.7)',
             }}
           >
             <DropdownItem>View Profile</DropdownItem>
-            <DropdownItem>Sign Out</DropdownItem>
+            <DropdownItem
+              onClick={() => this.props.onRouteChange('signin', false)}
+            >
+              Sign Out
+            </DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </div>
