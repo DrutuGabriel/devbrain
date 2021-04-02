@@ -47,7 +47,11 @@ class ProfileIcon extends PureComponent {
               backgroundColor: 'rgba(255, 255,255,0.7)',
             }}
           >
-            <DropdownItem>View Profile</DropdownItem>
+            <DropdownItem
+              onClick={this.props.toggleModal}
+            >
+              View Profile
+            </DropdownItem>
             <DropdownItem
               onClick={() => this.props.onRouteChange('signin', false)}
             >

@@ -8,6 +8,8 @@ import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import SignIn from './components/SignIn/SignIn';
 import Register from './components/Register/Register';
+import Profile from './components/Profile/Profile';
+import Modal from './components/Modal/Modal';
 
 import './App.css';
 
@@ -38,14 +40,17 @@ const initialState = {
   input: '',
   imageUrl: '',
   boxes: [],
-  route: 'home',
-  signedIn: true,
+  route: 'signin',
+  signedIn: false,
+  isProfileOpen: false,
   user: {
     id: '',
     name: '',
     email: '',
     entries: 0,
     joined: '',
+    pet: '',
+    age: '',
   },
 };
 
@@ -98,12 +103,12 @@ class App extends PureComponent {
   onSubmitHandler = () => {
     this.setState({ imageUrl: this.state.input, boxes: [] });
 
-      fetch('http://localhost:8000/image-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({input: this.state.input})
-      })
-      .then(response => response.json())
+    fetch('http://localhost:8000/image-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input: this.state.input }),
+    })
+      .then((response) => response.json())
       .then((response) => {
         if (response) {
           fetch('http://localhost:8000/image', {
@@ -132,15 +137,28 @@ class App extends PureComponent {
     const newState = { route };
     if (signedIn !== null) {
       newState.signedIn = signedIn;
-    } else if(route === 'signout'){
+    } else if (route === 'signout') {
       return this.setState(...initialState, ...newState);
     }
 
     this.setState(newState);
   };
 
+  toggleModal = () => {
+    this.setState((prevState) => ({
+      isProfileOpen: !prevState.isProfileOpen,
+    }));
+  };
+
   render() {
-    const { signedIn, imageUrl, route, boxes } = this.state;
+    const {
+      signedIn,
+      imageUrl,
+      route,
+      boxes,
+      isProfileOpen,
+      user
+    } = this.state;
     console.log(this.state);
     return (
       <div className="App">
@@ -148,7 +166,17 @@ class App extends PureComponent {
         <Navigation
           onRouteChange={this.onRouteChangeHandler}
           isSignedIn={signedIn}
+          toggleModal={this.toggleModal}
         />
+        {isProfileOpen && (
+          <Modal>
+            <Profile
+              isProfileOpen={isProfileOpen}
+              toggleModal={this.toggleModal}
+              user={user}
+            />
+          </Modal>
+        )}
 
         {route === 'home' ? (
           <React.Fragment>
