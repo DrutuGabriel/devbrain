@@ -1,35 +1,41 @@
 const handleSignin = (req, res, db, bcrypt) => {
-  const {email, password} = req.body;
+  const { email, password } = req.body;
   if (!email || !password) {
-    return res
-      .status(400)
-      .json({ success: false, message: 'Incorrect form submission.' });
+    return Promise.reject('Incorrect form submission');
   }
 
-  db.select('email', 'hash')
+  return db.select('email', 'hash')
     .from('login')
     .where('email', '=', email)
     .then((data) => {
       const isValid = bcrypt.compareSync(password, data[0].hash);
 
       if (isValid) {
-        db.select('*')
+        return db.select('*')
           .from('users')
           .where('email', '=', email)
-          .then((user) => {
-            return res.json({ success: true, user: user[0] });
-          });
+          .then((user) => user[0]);
       } else {
-        res
-          .status(400)
-          .json({ success: false, message: 'Error while loggin in' });
+         return Promise.reject('Error while loggin in');
       }
     })
-    .catch((err) =>
-      res.status(400).json({ success: false, message: 'Error while loggin in' })
-    );
+    .catch((err) => Promise.reject('Error while loggin in'));
+};
+
+const getAuthTokenId = () => {
+  console.log('auth ok');
+};
+
+const auth = (db, bcrypt) => (req, res) => {
+  const { authorization } = req.headers;
+
+  return authorization 
+    ? getAuthTokenId() 
+    : handleSignin(req, res, db, bcrypt)
+      .then(data => res.json({success: true, user: data}))
+      .catch(err => res.status(400).json({success: false, error: err}));
 };
 
 module.exports = {
-  handleSignin: handleSignin
+  auth: auth,
 };

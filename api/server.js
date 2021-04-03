@@ -26,9 +26,7 @@ app.get('/', (req, res) => {
   res.json({'status': 'working well'});
 });
 
-app.post('/signin', (req, res) => (
-  signIn.handleSignin(req, res, db, bcrypt)
-));
+app.post('/signin', signIn.auth(db, bcrypt));
 
 app.post('/register', (req, res) => (
   register.handleRegister(req, res, db, bcrypt)
