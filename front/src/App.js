@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react';
 import Particles from 'react-particles-js';
 
 import Navigation from './components/Navigation/Navigation';
-import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
@@ -238,7 +237,6 @@ class App extends PureComponent {
 
         {route === 'home' ? (
           <React.Fragment>
-            <Logo />
             <Rank
               name={this.state.user.name}
               entries={this.state.user.entries}
