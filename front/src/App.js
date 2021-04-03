@@ -68,6 +68,8 @@ class App extends PureComponent {
       user: {
         id: userData.id,
         name: userData.name,
+        age: userData.age,
+        pet: userData.pet,
         email: userData.email,
         entries: userData.entries,
         joined: userData.joined,
