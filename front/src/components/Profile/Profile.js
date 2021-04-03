@@ -22,7 +22,8 @@ class Profile extends PureComponent {
     fetch(`http://localhost:8000/profile/${this.props.user.id}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': this.props.getAuthToken()
       },
       body: JSON.stringify({formInput: data})
     })

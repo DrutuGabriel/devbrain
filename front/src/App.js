@@ -62,7 +62,7 @@ class App extends PureComponent {
   }
 
   componentDidMount(){
-    const token = window.sessionStorage.getItem('token');
+    const token = this.getAuthToken();
 
     if(token){
       fetch('http://localhost:8000/signin', {
@@ -85,7 +85,9 @@ class App extends PureComponent {
     }
   }
 
-  onLoadUser = (userId, token = null) => {
+  onLoadUser = (userId) => {
+    const token = this.getAuthToken();
+
     fetch(`http://localhost:8000/profile/${userId}`, {
       method: 'GET',
       headers: {
@@ -143,7 +145,10 @@ class App extends PureComponent {
 
     fetch('http://localhost:8000/image-url', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': this.getAuthToken()
+      },
       body: JSON.stringify({ input: this.state.input }),
     })
       .then((response) => response.json())
@@ -151,7 +156,10 @@ class App extends PureComponent {
         if (response) {
           fetch('http://localhost:8000/image', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': this.getAuthToken()
+            },
             body: JSON.stringify({ id: this.state.user.id }),
           })
             .then((response) => response.json())
@@ -170,6 +178,10 @@ class App extends PureComponent {
       })
       .catch((err) => console.log(err));
   };
+
+  getAuthToken = () => {
+    return window.sessionStorage.getItem('token');
+  }
 
   onRouteChangeHandler = (route, signedIn = null) => {
     const newState = { route };
@@ -219,6 +231,7 @@ class App extends PureComponent {
               loadUser={this.onLoadUser}
               toggleModal={this.toggleModal}
               user={user}
+              getAuthToken={this.getAuthToken}
             />
           </Modal>
         )}

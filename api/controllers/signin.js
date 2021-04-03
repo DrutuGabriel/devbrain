@@ -81,4 +81,5 @@ const auth = (db, bcrypt) => (req, res) => {
 
 module.exports = {
   auth: auth,
+  redisClient: redisClient
 };
