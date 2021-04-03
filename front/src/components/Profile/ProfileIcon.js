@@ -53,7 +53,7 @@ class ProfileIcon extends PureComponent {
               View Profile
             </DropdownItem>
             <DropdownItem
-              onClick={() => this.props.onRouteChange('signin', false)}
+              onClick={() => this.props.onRouteChange('signout')}
             >
               Sign Out
             </DropdownItem>

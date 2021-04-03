@@ -61,11 +61,40 @@ class App extends PureComponent {
     this.state = initialState;
   }
 
-  onLoadUser = (userId) => {
-    fetch(`http://localhost:8000/profile/${userId}`)
+  componentDidMount(){
+    const token = window.sessionStorage.getItem('token');
+
+    if(token){
+      fetch('http://localhost:8000/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        }
+      })
+      .then(data => data.json())
+      .then(data => {
+        if(data.success){
+          this.onLoadUser(data.userId, token);
+          this.setState({
+            signedIn: true,
+            route: 'home'
+          });
+        }
+      });
+    }
+  }
+
+  onLoadUser = (userId, token = null) => {
+    fetch(`http://localhost:8000/profile/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token
+      }
+    })
     .then(response => response.json())
     .then((userData) => {
-      if (!userData.id) {
+      if (!userData || !userData.id) {
         return console.log('Something went wrong.');
       }
 
@@ -146,8 +175,11 @@ class App extends PureComponent {
     const newState = { route };
     if (signedIn !== null) {
       newState.signedIn = signedIn;
-    } else if (route === 'signout') {
-      return this.setState(...initialState, ...newState);
+    } 
+
+    if(route === 'signout') {
+      this.removeSessionToken();
+      return this.setState({...initialState, route: 'signin'});
     }
 
     this.setState(newState);
@@ -159,6 +191,10 @@ class App extends PureComponent {
     }));
   };
 
+  removeSessionToken = () => {
+    window.sessionStorage.removeItem('token');
+  }
+
   render() {
     const {
       signedIn,
@@ -168,7 +204,7 @@ class App extends PureComponent {
       isProfileOpen,
       user,
     } = this.state;
-    console.log(this.state);
+
     return (
       <div className="App">
         <Particles className="particles" params={particleOptions} />

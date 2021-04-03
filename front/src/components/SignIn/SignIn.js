@@ -9,6 +9,11 @@ class SignIn extends React.Component {
       signInPassword: ''
     }
   }
+
+  saveAuthTokenInSession = token => {
+    window.sessionStorage.setItem('token', token);
+  }
+
   onEmailChange = event => {
     this.setState({signInEmail: event.target.value});
   }
@@ -30,8 +35,8 @@ class SignIn extends React.Component {
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data)
       if(data.success === true){
+        this.saveAuthTokenInSession(data.token);
         this.props.loadUser(data.userId);
         this.props.onRouteChange('home', true)
       }
