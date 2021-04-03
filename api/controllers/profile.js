@@ -1,4 +1,4 @@
-const handleProfile = (req, res, db) => {
+const handleProfileGet = (req, res, db) => {
   const { id } = req.params;
 
   db.select('*')
@@ -16,6 +16,26 @@ const handleProfile = (req, res, db) => {
     );
 };
 
+const handleProfileUpdate = (req, res, db) => {
+  const { id } = req.params;
+  const { name, age, pet } = req.body.formInput;
+
+  db('users')
+    .where({ id })
+    .update({ name })
+    .then((result) => {
+      if (result) {
+        res.json({ success: true });
+      } else {
+        res.status(400).json({ success: false, message: 'Unable to update' });
+      }
+    })
+    .catch((err) =>
+      res.status(400).json({ success: false, message: 'Error updating user' })
+    );
+};
+
 module.exports = {
-  handleProfile: handleProfile
+  handleProfileGet: handleProfileGet,
+  handleProfileUpdate: handleProfileUpdate,
 };
