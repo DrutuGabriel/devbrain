@@ -13,7 +13,7 @@ const db = require('knex')({
 });
 
 const auth = require('./controllers/auth');
-const register =  require('./controllers/register');
+const register = require('./controllers/register');
 const signIn = require('./controllers/signin');
 const profile = require('./controllers/profile');
 const image = require('./controllers/image');
@@ -24,29 +24,30 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.get('/', (req, res) => {
-  res.json({'status': 'working well'});
+  res.json({ status: 'working well' });
 });
 
 app.post('/signin', signIn.auth(db, bcrypt));
 
-app.post('/register', (req, res) => (
+app.post('/register', (req, res) =>
   register.handleRegister(req, res, db, bcrypt)
-));
+);
 
-app.get('/profile/:id', auth.requireAuth, (req, res) => (
+app.get('/profile/:id', auth.requireAuth, (req, res) =>
   profile.handleProfileGet(req, res, db)
-));
+);
 
-app.post('/profile/:id', auth.requireAuth, (req, res) => (
+app.post('/profile/:id', auth.requireAuth, (req, res) =>
   profile.handleProfileUpdate(req, res, db)
-));
+);
 
-app.put('/image', auth.requireAuth, (req, res) => (
+app.put('/image', auth.requireAuth, (req, res) =>
   image.handleImage(req, res, db)
-));
+);
 
-app.post('/image-url', auth.requireAuth, image.handleApiCall);
-
+app.post('/image-url', auth.requireAuth, (req, res) =>
+  image.handleApiCall(req, res, db)
+);
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {

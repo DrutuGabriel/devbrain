@@ -16,6 +16,24 @@ const requireAuth = (req, res, next) => {
   })  
 };
 
+const getUserId = (authorization) => {
+
+  if(!authorization){
+    return null;
+  }
+
+  return new Promise((resv, rej) => {
+    redisClient.get(authorization, (err, reply) => {
+      if(err || !reply){
+        return resv(null);
+      }
+
+      return resv(reply);
+    });
+  });
+}
+
 module.exports = {
-  requireAuth: requireAuth
+  requireAuth: requireAuth,
+  getUserId: getUserId
 };

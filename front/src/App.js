@@ -152,7 +152,7 @@ class App extends PureComponent {
     })
       .then((response) => response.json())
       .then((response) => {
-        if (response) {
+        if (response.success) {
           fetch('http://localhost:8000/image', {
             method: 'PUT',
             headers: { 
@@ -169,11 +169,13 @@ class App extends PureComponent {
                 );
               }
             });
+                
+          this.displayFaceBox(
+            this.calculateFaceLocations(response.faceData.outputs[0].data.regions)
+          );
+        } else {
+          console.log(response.message);
         }
-
-        this.displayFaceBox(
-          this.calculateFaceLocations(response.outputs[0].data.regions)
-        );
       })
       .catch((err) => console.log(err));
   };
