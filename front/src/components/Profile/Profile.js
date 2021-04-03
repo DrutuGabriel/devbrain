@@ -18,15 +18,23 @@ class Profile extends PureComponent {
     });
   }
 
-  handleFormSubmit = ev => {
-    ev.preventDefault();
-
-    console.log(this.state);
-    // POST to profile/:id 
-    // with formInput = name,age,pet
-    // then refresh ?
+  updateProfile = (data) => {
+    fetch(`http://localhost:8000/profile/${this.props.user.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({formInput: data})
+    })
+    .then(resp => {
+      this.props.toggleModal();
+      this.props.loadUser({
+        ...this.props.user, 
+        ...data
+      });
+    })
+    .catch(console.log);
   }
-
 
   render() {
     const {user, toggleModal} = this.props;
@@ -91,7 +99,7 @@ class Profile extends PureComponent {
             >
               <button 
                 className="b pa2 grow pointer hover-white w-40 bg-light-blue b--back-20"
-                onClick={this.handleFormSubmit}
+                onClick={() => this.updateProfile(this.state)}
               >
                 Save
               </button>

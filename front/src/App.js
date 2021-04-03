@@ -62,9 +62,8 @@ class App extends PureComponent {
   }
 
   onLoadUser = (userData) => {
-    this.setState({
-      imageUrl: '',
-      input: '',
+    this.setState(prevState => ({
+      ...prevState,
       user: {
         id: userData.id,
         name: userData.name,
@@ -74,7 +73,7 @@ class App extends PureComponent {
         entries: userData.entries,
         joined: userData.joined,
       },
-    });
+    }));
   };
 
   calculateFaceLocations = (regions) => {
@@ -173,7 +172,7 @@ class App extends PureComponent {
         {isProfileOpen && (
           <Modal>
             <Profile
-              isProfileOpen={isProfileOpen}
+              loadUser={this.onLoadUser}
               toggleModal={this.toggleModal}
               user={user}
             />
