@@ -28,10 +28,7 @@ class Profile extends PureComponent {
     })
     .then(resp => {
       this.props.toggleModal();
-      this.props.loadUser({
-        ...this.props.user, 
-        ...data
-      });
+      this.props.loadUser(this.props.user.id);
     })
     .catch(console.log);
   }

@@ -61,19 +61,27 @@ class App extends PureComponent {
     this.state = initialState;
   }
 
-  onLoadUser = (userData) => {
-    this.setState(prevState => ({
-      ...prevState,
-      user: {
-        id: userData.id,
-        name: userData.name,
-        age: userData.age,
-        pet: userData.pet,
-        email: userData.email,
-        entries: userData.entries,
-        joined: userData.joined,
-      },
-    }));
+  onLoadUser = (userId) => {
+    fetch(`http://localhost:8000/profile/${userId}`)
+    .then(response => response.json())
+    .then((userData) => {
+      if (!userData.id) {
+        return console.log('Something went wrong.');
+      }
+
+      this.setState((prevState) => ({
+        ...prevState,
+        user: {
+          id: userData.id,
+          name: userData.name,
+          age: userData.age,
+          pet: userData.pet,
+          email: userData.email,
+          entries: userData.entries,
+          joined: userData.joined,
+        },
+      }));
+    });
   };
 
   calculateFaceLocations = (regions) => {
@@ -158,7 +166,7 @@ class App extends PureComponent {
       route,
       boxes,
       isProfileOpen,
-      user
+      user,
     } = this.state;
     console.log(this.state);
     return (

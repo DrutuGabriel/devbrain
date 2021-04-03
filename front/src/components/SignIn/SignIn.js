@@ -32,7 +32,7 @@ class SignIn extends React.Component {
     .then(data => {
       console.log(data)
       if(data.success === true){
-        this.props.loadUser(data.user);
+        this.props.loadUser(data.userId);
         this.props.onRouteChange('home', true)
       }
     });    
