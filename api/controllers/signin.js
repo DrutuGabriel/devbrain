@@ -1,4 +1,9 @@
 const jwt = require('jsonwebtoken');
+const redis = require('redis');
+
+const redisClient = redis.createClient({
+  host: process.env.REDIS_HOST,
+});
 
 const handleSignin = (req, res, db, bcrypt) => {
   const { email, password } = req.body;
@@ -26,8 +31,16 @@ const handleSignin = (req, res, db, bcrypt) => {
     .catch((err) => Promise.reject('Error while loggin in'));
 };
 
-const getAuthTokenId = () => {
-  console.log('auth ok');
+const getAuthTokenId = (req, res) => {
+  const { authorization } = req.headers;
+
+  return redisClient.get(authorization, (err, reply) => {
+    if (err || !reply) {
+      return res.status(400).json({ success: false, message: 'Unauthorized' });
+    }
+
+    return res.json({ success: true, userId: reply, token: authorization });
+  });
 };
 
 const signToken = (email) => {
@@ -36,32 +49,34 @@ const signToken = (email) => {
   return jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: '2 days' });
 };
 
+const setToken = (key, value) => {
+  return Promise.resolve(redisClient.set(key, value));
+};
+
 const createSession = (user) => {
   const { email, id } = user;
   const token = signToken(email);
 
-  return {
-    token: token,
-    success: true,
-    userId: id
-   };
+  return setToken(token, id)
+    .then(() => ({
+      token: token,
+      success: true,
+      userId: id,
+    }))
+    .catch(console.log);
 };
 
 const auth = (db, bcrypt) => (req, res) => {
   const { authorization } = req.headers;
 
   return authorization
-    ? getAuthTokenId()
+    ? getAuthTokenId(req, res)
     : handleSignin(req, res, db, bcrypt)
-      .then((data) => (
-        data.id && data.email 
-        ? createSession(data)
-        : Promise.reject(data)
-      ))
-      .then(data => {
-        return res.json(data);
-      })
-      .catch((err) => res.status(400).json({ success: false, error: err }))
+        .then((data) =>
+          data.id && data.email ? createSession(data) : Promise.reject(data)
+        )
+        .then((data) => res.json(data))
+        .catch((err) => res.status(400).json({ success: false, error: err }));
 };
 
 module.exports = {

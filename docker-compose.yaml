@@ -13,6 +13,7 @@ services:
       - ./env/api.env
     depends_on: 
       - mydb
+      - myredis
   smartbrain-app:
     build: 
       context: ./front
@@ -37,7 +38,8 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/tables:/docker-entrypoint-initdb.d
     # network_mode: "host"
-     
+  myredis:
+    image: redis
 volumes:
   api_node_modules:
   pgdata: 
