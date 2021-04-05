@@ -6,3 +6,6 @@ services:
       dockerfile: heroku.dockerfile
     stdin_open: true
     tty: true
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public

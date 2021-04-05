@@ -34,7 +34,7 @@ class ProfileIcon extends PureComponent {
             aria-expanded={this.state.dropdownOpen}
           >
             <img
-              src="http://tachyons.io/img/logo.jpg"
+              src="https://tachyons.io/img/logo.jpg"
               className="br-100 pa1 ba b--black-10 h3 w3"
               alt="avatar"
             />
