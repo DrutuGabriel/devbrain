@@ -19,7 +19,7 @@ class Profile extends PureComponent {
   }
 
   updateProfile = (data) => {
-    fetch(`http://localhost:8000/profile/${this.props.user.id}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/profile/${this.props.user.id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

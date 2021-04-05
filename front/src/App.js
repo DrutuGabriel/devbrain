@@ -64,7 +64,7 @@ class App extends PureComponent {
     const token = this.getAuthToken();
 
     if(token){
-      fetch('http://localhost:8000/signin', {
+      fetch(`${process.env.REACT_APP_API_URL}/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ class App extends PureComponent {
   onLoadUser = (userId) => {
     const token = this.getAuthToken();
 
-    fetch(`http://localhost:8000/profile/${userId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/profile/${userId}`, {
       method: 'GET',
       headers: {
         'Authorization': token
@@ -142,7 +142,7 @@ class App extends PureComponent {
   onSubmitHandler = () => {
     this.setState({ imageUrl: this.state.input, boxes: [] });
 
-    fetch('http://localhost:8000/image-url', {
+    fetch(`${process.env.REACT_APP_API_URL}/image-url`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ class App extends PureComponent {
       .then((response) => response.json())
       .then((response) => {
         if (response.success) {
-          fetch('http://localhost:8000/image', {
+          fetch(`${process.env.REACT_APP_API_URL}/image`, {
             method: 'PUT',
             headers: { 
               'Content-Type': 'application/json',

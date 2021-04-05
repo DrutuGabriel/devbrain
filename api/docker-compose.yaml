@@ -1,9 +1,11 @@
 version: "3.8"
 services:
-  api:
-    build: ./
-    ports:
-      - "8000:8000"
+  myheroku:
+    build: 
+      context: ./
+      dockerfile: heroku.dockerfile
+    stdin_open: true
+    tty: true
     volumes:
       - ./:/app
       - api_node_modules:/app/node_modules

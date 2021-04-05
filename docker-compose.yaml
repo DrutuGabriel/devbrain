@@ -22,9 +22,13 @@ services:
     tty: true
     ports:
       - "3000:3000"
+    env_file:
+      - ./env/front.env
     volumes:
       - ./front/src:/app/src
       - ./front/public:/app/public
+    depends_on:
+      - api
   mydb:
     build: 
       context: ./postgres
